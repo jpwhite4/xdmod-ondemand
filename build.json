@@ -16,6 +16,9 @@
         ]
     },
     "file_maps": {
+        "data": [
+            "classes"
+        ],
         "etc": {
             "configuration/etl": "",
             "configuration/modules.d": "",
