@@ -129,4 +129,7 @@ The pipeline is then run as follows:
 
 - What are the default permissions for the OnDemand realm
 
-The default permission is that user accounts with center 
+The default permission is that user accounts with center director and center staff role
+have full access to the OnDemand realm. Other accounts and the public user will not see the
+realm.
+
