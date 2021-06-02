@@ -79,27 +79,54 @@ Instructions for adding the resource are on the [main Open XDMoD page](https://o
 
 The Open OnDemand resource must have a type set to "Gateway".
 
+The resource setup menu will prompt for the node and core count for the resource. These
+data are not currently used by the On Demand module so any value can be used.
+
 After the resource has been added then the `xdmod-ingestor` script must be run to load
+the resource information into the XDMoD datawarehouse.
 
 
-  TODO: specify GeoIP data file location
+### GeoIP database setup
 
-TODO: specify webserver log file location
+If a GeoIP database is used then the file should be copied to the XDMoD.
+The `xdmod` user should have read access to the file.
 
+If a GeoIP database is not going to be used then the `etl/etl.d/ood.json` configuration
+file should be edited to remove the `geoip_file` configuration parameter
+from the `log-ingestion` endpoint definition. A sed command that will remove
+the line is shown below:
 
-0) Add the `modw_ondemand` schema to the database.
-1) Add a new resource to XDMoD using the XDMoD setup program. Resource type should be 'Gateway'.
-2) run `xdmod-ingestor` to load the new resource into the database.
+```bash
+# sed -i '/"geoip_file":/d' /etc/xdmod/etl/etl.d/ood.json
+```
 
 # Usage
 
 Prerequisites:
-1) Make sure you have added the OnDemand resource via `xdmod-setup` and run `xdmod-ingestor` to load the resource
+1) The database schema has been created (either manually or via `xdmod-setup`).
+2) The `acl-config` command has been run (`xdmod-setup` does this automatically after the database is setup).
+3) The OnDemand resource has been added via `xdmod-setup` and `xdmod-ingestor` run to load the resource
    into XDMoD's datawarehouse.
+4) Either: a GeoIP database file available or GeoIP lookup disabled by editing the configuration.
 
-To ingest the OnDemand weblogs. You need to specify the hostname of the ondemand instance exactly
-as it appears in the server logs. This includes the `https://` parts and any port numbers but
-do not include the trailing forward slash. You also need to specify the XDMoD resource name.
-For example:
 
-    /usr/share/xdmod/tools/etl/etl_overseer.php -p ondemand.log-ingestion -p ondemand.aggregation -d OOD_HOSTNAME=https://ondemand.ccr.buffalo.edu -d OOD_RESOURCE_CODE=ondemand -v debug
+The OnDemand weblog ingestion pipeline requires four parameters:
+
+| Parameter Name | Default | Description
+| -------------- | ------- | -----------
+| `OOD_RESOURCE_CODE` | - | Must be set to the name of the resource when it was added to XDMoD in the `xdmod-setup` command. |
+| `OOD_HOSTNAME | - | Must be set to the hostname of the ondemand instance exactly as it appears in the server logs. This includes the `https://` parts and any port numbers but do not include the trailing forward slash. |
+| `GEOIP_FILE_PATH` | /scratch/GeoLite2-City.mmdb | Set to the path to the GeoIP file. This variable is not used if the geoip lookup is disabled following the instructions above |
+| `OOD_LOG_PATH` | /scratch/ondemand | Set to the path to a directory containing webserver log files from the Open OnDemand server. |
+
+
+The pipeline is then run as follows:
+
+    /usr/share/xdmod/tools/etl/etl_overseer.php -p ondemand.log-ingestion -p ondemand.aggregation -d GEOIP_FILE_PATH=/path/to/geoipfile -d OOD_LOG_PATH=/path/to/ood_server_logs -d OOD_HOSTNAME=https://ondemand.ccr.xdmod.org -d OOD_RESOURCE_CODE=ondemand -v debug
+
+
+### FAQ
+
+- What are the default permissions for the OnDemand realm
+
+The default permission is that user accounts with center 
