@@ -18,6 +18,10 @@
                     "config": "database",
                     "schema": "modw_ondemand"
                 }
+            },
+            "paths": {
+                "OOD_LOG_PATH": "/scratch/ondemand",
+                "GEOIP_FILE_PATH": "/scratch/GeoLite2-City.mmdb"
             }
         }
     },
@@ -32,13 +36,13 @@
                 "source": {
                     "type": "directoryscanner",
                     "name": "Web Server Logs",
-                    "path": "/scratch/ondemand",
+                    "path": "${OOD_LOG_PATH}",
                     "file_pattern": "/\\.log\\..*$/",
                     "handler": {
                         "type": "webserverlog",
                         "record_separator": "\n",
                         "log_format": "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"",
-                        "geoip_file": "/tmp/GeoLite2-City.mmdb"
+                        "geoip_file": "${GEOIP_FILE_PATH}"
                     }
                 }
             }
